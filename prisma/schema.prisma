@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+enum Role {
+  USER  
+  ADMIN 
+  
+}
+
+enum StatusLaporan {
+    BELUM_DIPROSES
+    SUDAH_DIPROSES
+}
+
+model User {
+  id            Int       @id @default(autoincrement()) 
+  email         String    @unique 
+  name          String?   
+  alamatLengkap String?   
+  password      String    
+  role          Role      @default(USER) 
+
+  laporan   Laporan[] 
+
+  createdAt DateTime  @default(now()) 
+  updatedAt DateTime  @updatedAt      
+}
+
+model Laporan {
+  id                 Int      @id @default(autoincrement()) 
+  alamat             String   
+  koordinatLatitude  Float    
+  koordinatLongitude Float    
+  description        String?  
+  imageUrl           String   
+  status             StatusLaporan @default(BELUM_DIPROSES)
+  
+  createdAt          DateTime @default(now()) 
+  updatedAt          DateTime @updatedAt     
+
+  // Relasi ke User (pelapor)
+  pelaporId          Int      
+  pelapor            User     @relation(fields: [pelaporId], references: [id], onDelete: Cascade)
+}
