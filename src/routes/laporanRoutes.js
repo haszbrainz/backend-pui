@@ -1,23 +1,18 @@
 // src/routes/laporanRoutes.js
 import express from 'express';
 import * as LaporanController from '../controllers/laporanController.js';
-// import { authenticateTokenMiddleware } from '../middleware/authMiddleware.js'; // Contoh jika ada middleware auth
+import upload from '../middleware/uploadMiddleware.js'; // <-- IMPOR BARU
 
 const router = express.Router();
 
-// Create Laporan - Mungkin perlu autentikasi
-router.post('/', /* authenticateTokenMiddleware, */ LaporanController.createLaporan);
+// Gunakan middleware upload.single('imageUrl') pada rute POST
+// 'imageUrl' adalah nama field yang akan dikirim dari Postman/Flutter
+router.post('/', upload.single('imageUrl'), LaporanController.createLaporan); // <-- PERUBAHAN DI SINI
 
-// Get All Laporan
+// Rute lainnya tetap sama
 router.get('/', LaporanController.getAllLaporan);
-
-// Get Laporan by ID
 router.get('/:id', LaporanController.getLaporanById);
-
-// Update Laporan - Perlu autentikasi & otorisasi
-router.put('/:id', /* authenticateTokenMiddleware, */ LaporanController.updateLaporan);
-
-// Delete Laporan - Perlu autentikasi & otorisasi (misal, admin only)
-router.delete('/:id', /* authenticateTokenMiddleware, */ LaporanController.deleteLaporan);
+router.put('/:id', LaporanController.updateLaporan);
+router.delete('/:id', LaporanController.deleteLaporan);
 
 export default router;

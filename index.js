@@ -1,26 +1,44 @@
 import 'dotenv/config';
-// src/index.js
 import express from 'express';
-import userRoutes from './src/routes/userRoutes.js'; // Path relatif dari src/ ke src/routes/
-import laporanRoutes from './src/routes/laporanRoutes.js'; // Path relatif dari src/ ke src/routes/
-// import laporanRoutes from './routes/laporanRoutes.js'; // Jika Anda memindahkan rute laporan juga
+import path from 'path'; // Impor modul 'path' dari Node.js
+import { fileURLToPath } from 'url'; // Untuk mendapatkan path direktori dengan ES Modules
+
+import userRoutes from './src/routes/userRoutes.js';
+import laporanRoutes from './src/routes/laporanRoutes.js';
+
+// --- BAGIAN KRUSIAL UNTUK MENDAPATKAN PATH DIREKTORI YANG BENAR ---
+// Ini diperlukan saat menggunakan ES Modules (import/export)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// --- AKHIR BAGIAN KRUSIAL ---
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Di src/index.js atau middleware logging Anda
+// Middleware untuk parsing JSON dan URL-encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+// --- MIDDLEWARE UNTUK MENYAJIKAN FILE STATIS (GAMBAR) ---
+// Ini harus ditempatkan SEBELUM Anda mendaftarkan rute API Anda.
+// `path.join(__dirname, '../public/uploads')` akan membuat path yang benar:
+// dari `src/` (lokasi __dirname) -> keluar satu level `../` -> masuk ke `public/uploads`
+app.use('/uploads', express.static(path.join(__dirname, './public/uploads')));
+// --- AKHIR MIDDLEWARE STATIS ---
+
+
+
+// Middleware logging sederhana
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
-  console.log('Request Body:', req.body); // <-- Pastikan ini ada!
-  console.log('Request Query:', req.query);
-  console.log('Request Params:', req.params);
   next();
 });
 
-app.use(express.json());
-
+// Daftarkan Rute
 app.use('/api/users', userRoutes);
 app.use('/api/laporan', laporanRoutes);
+
 // app.use('/api/laporan', laporanRoutes); // Daftarkan rute laporan jika sudah dipindah
 
 app.get('/', (req, res) => {
