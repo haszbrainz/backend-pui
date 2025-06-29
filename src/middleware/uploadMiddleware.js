@@ -1,17 +1,19 @@
-// src/middleware/uploadMiddleware.js
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs'; // <-- Impor module 'fs' untuk operasi file system
+
+// Tentukan direktori tujuan
+const uploadDir = 'public/uploads/';
+
+// Pastikan direktori ada, jika tidak, buat secara rekursif
+fs.mkdirSync(uploadDir, { recursive: true });
 
 // Konfigurasi penyimpanan untuk Multer
 const storage = multer.diskStorage({
-  // Tentukan folder tujuan untuk menyimpan file
   destination: function (req, file, cb) {
-    // Pastikan folder ini ada. Buat secara manual jika perlu.
-    cb(null, 'public/uploads/'); 
+    cb(null, uploadDir); // Gunakan variabel direktori
   },
-  // Buat nama file yang unik untuk menghindari konflik
   filename: function (req, file, cb) {
-    // Contoh: namafile-timestamp.ekstensi
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
@@ -19,14 +21,21 @@ const storage = multer.diskStorage({
 
 // Filter file untuk hanya menerima tipe gambar tertentu
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
-    cb(null, true); // Terima file
+  const allowedTypes = [
+    'image/jpeg', 
+    'image/png', 
+    'image/jpg', 
+    'application/octet-stream' // <-- Izinkan tipe generik
+  ];
+
+  if (allowedTypes.includes(file.mimetype.toLowerCase())) {
+    cb(null, true);
   } else {
     cb(new Error('Hanya file gambar (JPEG, PNG, JPG) yang diizinkan!'), false); // Tolak file
   }
 };
 
-// Inisialisasi Multer dengan konfigurasi di atas
+
 const upload = multer({ 
   storage: storage,
   limits: {

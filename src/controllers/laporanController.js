@@ -4,32 +4,28 @@ import * as LaporanService from '../services/laporanService.js';
 // --- Fungsi Helper untuk menambahkan host ke imageUrl ---
 const addHostToImageUrl = (req, laporan) => {
   if (laporan && laporan.imageUrl) {
-    // Pastikan kita tidak menambahkan host jika sudah ada (misalnya dari CDN di masa depan)
     if (laporan.imageUrl.startsWith('/')) {
       const fullImageUrl = `${req.protocol}://${req.get('host')}${laporan.imageUrl}`;
       return { ...laporan, imageUrl: fullImageUrl };
     }
   }
-  return laporan; // Kembalikan laporan asli jika tidak ada imageUrl atau sudah lengkap
+  return laporan;
 };
-// --- Akhir Fungsi Helper ---
-
 
 export const createLaporan = async (req, res) => {
   try {
     const laporanData = req.body;
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : laporanData.imageUrl; // Ambil dari file upload atau body jika ada
 
-    if (!imageUrl) {
-        return res.status(400).json({ success: false, error: 'Gambar bukti wajib diunggah atau imageUrl harus ada.' });
+    // Logika yang diperbaiki: Langsung cek req.file
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'File gambar bukti wajib diunggah.' });
     }
 
+    // Sumber kebenaran untuk imageUrl hanya dari file yang diunggah
+    const imageUrl = `/uploads/${req.file.filename}`;
     const dataToService = { ...laporanData, imageUrl };
     
-    // Panggil service untuk membuat laporan
     const newLaporanFromDb = await LaporanService.createLaporanService(dataToService);
-
-    // Ubah data sebelum mengirim respons
     const newLaporanWithFullUrl = addHostToImageUrl(req, newLaporanFromDb);
 
     res.status(201).json({ success: true, message: 'Laporan berhasil dibuat.', data: newLaporanWithFullUrl });
@@ -38,6 +34,7 @@ export const createLaporan = async (req, res) => {
     res.status(error.statusCode || 500).json({ success: false, error: error.message || 'Terjadi kesalahan pada server.' });
   }
 };
+
 
 export const getAllLaporan = async (req, res) => {
   try {
