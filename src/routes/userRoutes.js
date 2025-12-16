@@ -4,9 +4,9 @@ import * as UserController from '../controllers/userController.js'; // Path rela
 
 const router = express.Router();
 
-router.post('/register', UserController.registerUser);
-router.post('/login', UserController.loginUser); // <--- RUTE BARU LOGIN
-router.post('/logout', UserController.logoutUser); // <--- RUTE BARU LOGOUT (membutuhkan autentikasi jika ingin tahu siapa yg logout)
+// router.post('/register', UserController.registerUser); // Pindah ke /api/auth/register
+// router.post('/login', UserController.loginUser); // Pindah ke /api/auth/login
+// router.post('/logout', UserController.logoutUser);
 
 router.get('/', UserController.getAllUsers);
 router.get('/:id', UserController.getUserById);

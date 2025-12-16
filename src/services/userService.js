@@ -155,32 +155,5 @@ export const deleteUserService = async (userId) => { /* ... kode Anda ... */
 
 
 // --- FUNGSI BARU UNTUK LOGIN ---
-export const loginUserService = async (email, password) => {
-  if (!email || !password) {
-    const error = new Error('Email dan password wajib diisi.');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (!user) {
-    const error = new Error('Email atau password salah.'); // Pesan umum untuk keamanan
-    error.statusCode = 401; // Unauthorized
-    throw error;
-  }
-
-  const passwordMatch = await bcrypt.compare(password, user.password);
-  if (!passwordMatch) {
-    const error = new Error('Email atau password salah.'); // Pesan umum
-    error.statusCode = 401; // Unauthorized
-    throw error;
-  }
-
-  // Hapus password sebelum mengembalikan data user
-  const { password: _, ...userWithoutPassword } = user;
-  return userWithoutPassword; // Kembalikan data user tanpa password
-};
-// --- AKHIR FUNGSI BARU UNTUK LOGIN ---
+// --- FUNGSI LOGIN DIPINDAH KE AUTH SERVICE ---
+// export const loginUserService = ...

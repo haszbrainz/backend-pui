@@ -4,7 +4,10 @@ import path from 'path'; // Impor modul 'path' dari Node.js
 import { fileURLToPath } from 'url'; // Untuk mendapatkan path direktori dengan ES Modules
 
 import userRoutes from './src/routes/userRoutes.js';
-import laporanRoutes from './src/routes/laporanRoutes.js';
+import authRoutes from './src/routes/authRoutes.js';
+import articleRoutes from './src/routes/articleRoutes.js';
+import fishRoutes from './src/routes/fishRoutes.js';
+import reportRoutes from './src/routes/reportRoutes.js';
 
 // --- BAGIAN KRUSIAL UNTUK MENDAPATKAN PATH DIREKTORI YANG BENAR ---
 // Ini diperlukan saat menggunakan ES Modules (import/export)
@@ -37,7 +40,10 @@ app.use((req, res, next) => {
 
 // Daftarkan Rute
 app.use('/api/users', userRoutes);
-app.use('/api/laporan', laporanRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/articles', articleRoutes);
+app.use('/api/fish', fishRoutes);
+app.use('/api/reports', reportRoutes);
 
 // app.use('/api/laporan', laporanRoutes); // Daftarkan rute laporan jika sudah dipindah
 
