@@ -12,3 +12,11 @@ export const authenticateToken = (req, res, next) => {
         next();
     });
 };
+
+export const authorizeAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'ADMIN') {
+        next();
+    } else {
+        res.status(403).json({ success: false, error: "Access Denied: Admins Only" });
+    }
+};

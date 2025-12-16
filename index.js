@@ -8,6 +8,8 @@ import authRoutes from './src/routes/authRoutes.js';
 import articleRoutes from './src/routes/articleRoutes.js';
 import fishRoutes from './src/routes/fishRoutes.js';
 import reportRoutes from './src/routes/reportRoutes.js';
+import adminRoutes from './src/routes/adminRoutes.js';
+import prisma from './src/prismaClient.js';
 
 // --- BAGIAN KRUSIAL UNTUK MENDAPATKAN PATH DIREKTORI YANG BENAR ---
 // Ini diperlukan saat menggunakan ES Modules (import/export)
@@ -44,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/fish', fishRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/admin', adminRoutes);
 
 // app.use('/api/laporan', laporanRoutes); // Daftarkan rute laporan jika sudah dipindah
 
