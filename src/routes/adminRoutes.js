@@ -9,6 +9,7 @@ router.use(authenticateToken, authorizeAdmin);
 
 router.get('/dashboard', AdminController.getDashboard);
 router.get('/map', AdminController.getMapReports);
+router.get('/reports', AdminController.getAllReports); // New endpoint for list view
 router.put('/reports/:id/status', AdminController.updateReportStatus);
 
 export default router;

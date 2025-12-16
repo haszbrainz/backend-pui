@@ -18,6 +18,15 @@ export const getMapReports = async (req, res) => {
     }
 };
 
+export const getAllReports = async (req, res) => {
+    try {
+        const reports = await AdminService.getAllReports();
+        res.status(200).json({ success: true, data: reports });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 export const updateReportStatus = async (req, res) => {
     try {
         const { id } = req.params;

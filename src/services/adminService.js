@@ -28,6 +28,11 @@ export const getAllReportsForMap = async () => {
     });
 };
 
+// Re-use for list view as it fetches all necessary data
+export const getAllReports = async () => {
+    return await getAllReportsForMap();
+};
+
 export const updateReportStatus = async (reportId, status, adminNote) => {
     return await prisma.report.update({
         where: { id: reportId },
