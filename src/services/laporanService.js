@@ -32,9 +32,9 @@ export const createLaporanService = async (laporanData) => {
   // Validasi tipe data tambahan jika perlu (misalnya, koordinat adalah angka)
   const lat = parseFloat(koordinatLatitude);
   const lon = parseFloat(koordinatLongitude);
-  const pId = parseInt(pelaporId, 10);
+  // const pId = parseInt(pelaporId, 10); // MongoDB uses string IDs
 
-  if (isNaN(lat) || isNaN(lon) || isNaN(pId)) {
+  if (isNaN(lat) || isNaN(lon) || !pelaporId) {
     const error = new Error('Format koordinat atau pelaporId tidak valid.');
     error.statusCode = 400;
     throw error;
@@ -42,9 +42,9 @@ export const createLaporanService = async (laporanData) => {
 
   try {
     // Cek apakah user pelapor ada
-    const userExists = await prisma.user.findUnique({ where: { id: pId } });
+    const userExists = await prisma.user.findUnique({ where: { id: pelaporId } });
     if (!userExists) {
-      const error = new Error(`User dengan ID ${pId} tidak ditemukan.`);
+      const error = new Error(`User dengan ID ${pelaporId} tidak ditemukan.`);
       error.statusCode = 404;
       throw error;
     }
@@ -58,7 +58,7 @@ export const createLaporanService = async (laporanData) => {
         imageUrl,
         status: status || 'BELUM_DIPROSES', // Gunakan status dari input atau default dari skema
         pelapor: {
-          connect: { id: pId },
+          connect: { id: pelaporId },
         },
       },
       include: includePelaporData,
@@ -93,8 +93,8 @@ export const getAllLaporanService = async (filters = {}) => {
 };
 
 export const getLaporanByIdService = async (laporanId) => {
-  const id = parseInt(laporanId, 10);
-  if (isNaN(id)) {
+  // const id = parseInt(laporanId, 10);
+  if (!laporanId) {
     const error = new Error('ID Laporan tidak valid.');
     error.statusCode = 400;
     throw error;
@@ -102,7 +102,7 @@ export const getLaporanByIdService = async (laporanId) => {
 
   try {
     const laporan = await prisma.laporan.findUnique({
-      where: { id },
+      where: { id: laporanId },
       include: includePelaporData,
     });
 
@@ -123,8 +123,8 @@ export const getLaporanByIdService = async (laporanId) => {
 export const updateLaporanService = async (laporanId, updateData) => {
   // Dalam aplikasi nyata, tambahkan logika otorisasi di sini:
   // Siapa yang boleh update? Admin? User yang membuat laporan?
-  const id = parseInt(laporanId, 10);
-  if (isNaN(id)) {
+  // const id = parseInt(laporanId, 10);
+  if (!laporanId) {
     const error = new Error('ID Laporan tidak valid.');
     error.statusCode = 400;
     throw error;
@@ -141,11 +141,11 @@ export const updateLaporanService = async (laporanId, updateData) => {
   // Konversi tipe data jika perlu
   if (dataToUpdate.koordinatLatitude !== undefined) {
     dataToUpdate.koordinatLatitude = parseFloat(dataToUpdate.koordinatLatitude);
-    if(isNaN(dataToUpdate.koordinatLatitude)) delete dataToUpdate.koordinatLatitude; // Hapus jika tidak valid
+    if (isNaN(dataToUpdate.koordinatLatitude)) delete dataToUpdate.koordinatLatitude; // Hapus jika tidak valid
   }
   if (dataToUpdate.koordinatLongitude !== undefined) {
     dataToUpdate.koordinatLongitude = parseFloat(dataToUpdate.koordinatLongitude);
-    if(isNaN(dataToUpdate.koordinatLongitude)) delete dataToUpdate.koordinatLongitude; // Hapus jika tidak valid
+    if (isNaN(dataToUpdate.koordinatLongitude)) delete dataToUpdate.koordinatLongitude; // Hapus jika tidak valid
   }
 
 
@@ -157,7 +157,7 @@ export const updateLaporanService = async (laporanId, updateData) => {
 
   try {
     const updatedLaporan = await prisma.laporan.update({
-      where: { id },
+      where: { id: laporanId },
       data: dataToUpdate,
       include: includePelaporData,
     });
@@ -177,8 +177,8 @@ export const updateLaporanService = async (laporanId, updateData) => {
 
 export const deleteLaporanService = async (laporanId) => {
   // Dalam aplikasi nyata, tambahkan logika otorisasi di sini
-  const id = parseInt(laporanId, 10);
-  if (isNaN(id)) {
+  // const id = parseInt(laporanId, 10);
+  if (!laporanId) {
     const error = new Error('ID Laporan tidak valid.');
     error.statusCode = 400;
     throw error;
@@ -186,7 +186,7 @@ export const deleteLaporanService = async (laporanId) => {
 
   try {
     await prisma.laporan.delete({
-      where: { id },
+      where: { id: laporanId },
     });
     // Tidak ada data yang dikembalikan
   } catch (dbError) {

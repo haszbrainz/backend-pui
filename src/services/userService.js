@@ -43,114 +43,114 @@ export const createUserService = async (userData) => {
     const error = new Error('Gagal membuat user di database.');
     error.statusCode = 500;
     if (dbError.code === 'P2002' && dbError.meta?.target?.includes('email')) {
-        const specificError = new Error('Email sudah terdaftar (P2002).');
-        specificError.statusCode = 400;
-        throw specificError;
+      const specificError = new Error('Email sudah terdaftar (P2002).');
+      specificError.statusCode = 400;
+      throw specificError;
     }
     throw error;
   }
 };
 
-export const getAllUsersService = async () => { /* ... kode Anda ... */ 
-    try {
-        const users = await prisma.user.findMany({
-            select: selectUserPublicData, // Hanya ambil data yang diperlukan
-          orderBy: { createdAt: 'desc' },
-        });
-        return users;
-      } catch (dbError) {
-        console.error("Prisma Error in getAllUsersService:", dbError);
-        const error = new Error('Gagal mengambil data users dari database.');
-        error.statusCode = 500;
-        throw error;
-      }
+export const getAllUsersService = async () => { /* ... kode Anda ... */
+  try {
+    const users = await prisma.user.findMany({
+      select: selectUserPublicData, // Hanya ambil data yang diperlukan
+      orderBy: { createdAt: 'desc' },
+    });
+    return users;
+  } catch (dbError) {
+    console.error("Prisma Error in getAllUsersService:", dbError);
+    const error = new Error('Gagal mengambil data users dari database.');
+    error.statusCode = 500;
+    throw error;
+  }
 };
 export const getUserByIdService = async (userId) => { /* ... kode Anda ... */
-    const id = parseInt(userId, 10);
-    if (isNaN(id)) {
-      const error = new Error('ID User tidak valid.');
-      error.statusCode = 400;
+  // const id = parseInt(userId, 10);
+  if (!userId) {
+    const error = new Error('ID User tidak valid.');
+    error.statusCode = 400;
+    throw error;
+  }
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: selectUserPublicData, // Hanya ambil data yang diperlukan
+    });
+    if (!user) {
+      const error = new Error('User tidak ditemukan.');
+      error.statusCode = 404;
       throw error;
     }
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-        select: selectUserPublicData, // Hanya ambil data yang diperlukan
-      });
-      if (!user) {
-        const error = new Error('User tidak ditemukan.');
-        error.statusCode = 404;
-        throw error;
-      }
-      return user;
-    } catch (dbError) {
-      console.error("Prisma Error in getUserByIdService:", dbError);
-      const error = new Error('Gagal mengambil data user dari database.');
-      error.statusCode = 500;
-      throw error;
-    }
+    return user;
+  } catch (dbError) {
+    console.error("Prisma Error in getUserByIdService:", dbError);
+    const error = new Error('Gagal mengambil data user dari database.');
+    error.statusCode = 500;
+    throw error;
+  }
 };
-export const updateUserService = async (userId, updateData) => { /* ... kode Anda ... */ 
-    const id = parseInt(userId, 10);
-    if (isNaN(id)) {
-      const error = new Error('ID User tidak valid.');
+export const updateUserService = async (userId, updateData) => { /* ... kode Anda ... */
+  // const id = parseInt(userId, 10);
+  if (!userId) {
+    const error = new Error('ID User tidak valid.');
+    error.statusCode = 400;
+    throw error;
+  }
+  const dataToUpdate = { ...updateData };
+  if (dataToUpdate.password) {
+    dataToUpdate.password = await bcrypt.hash(dataToUpdate.password, saltRounds);
+  }
+  Object.keys(dataToUpdate).forEach(key => dataToUpdate[key] === undefined && delete dataToUpdate[key]);
+  delete dataToUpdate.laporan; delete dataToUpdate.createdAt; delete dataToUpdate.updatedAt; delete dataToUpdate.id;
+  if (Object.keys(dataToUpdate).length === 0) {
+    const error = new Error('Tidak ada data untuk diperbarui.');
+    error.statusCode = 400;
+    throw error;
+  }
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+    });
+    return updatedUser;
+  } catch (dbError) {
+    if (dbError.code === 'P2025') {
+      const error = new Error('User tidak ditemukan untuk diperbarui.');
+      error.statusCode = 404;
+      throw error;
+    }
+    if (dbError.code === 'P2002' && dbError.meta?.target?.includes('email')) {
+      const error = new Error('Email sudah digunakan oleh user lain.');
       error.statusCode = 400;
       throw error;
     }
-    const dataToUpdate = { ...updateData };
-    if (dataToUpdate.password) {
-      dataToUpdate.password = await bcrypt.hash(dataToUpdate.password, saltRounds);
-    }
-    Object.keys(dataToUpdate).forEach(key => dataToUpdate[key] === undefined && delete dataToUpdate[key]);
-    delete dataToUpdate.laporan; delete dataToUpdate.createdAt; delete dataToUpdate.updatedAt; delete dataToUpdate.id;
-    if (Object.keys(dataToUpdate).length === 0) {
-      const error = new Error('Tidak ada data untuk diperbarui.');
-      error.statusCode = 400;
-      throw error;
-    }
-    try {
-      const updatedUser = await prisma.user.update({
-        where: { id },
-        data: dataToUpdate,
-      });
-      return updatedUser;
-    } catch (dbError) {
-      if (dbError.code === 'P2025') {
-        const error = new Error('User tidak ditemukan untuk diperbarui.');
-        error.statusCode = 404;
-        throw error;
-      }
-      if (dbError.code === 'P2002' && dbError.meta?.target?.includes('email')) {
-        const error = new Error('Email sudah digunakan oleh user lain.');
-        error.statusCode = 400;
-        throw error;
-      }
-      console.error("Prisma Error in updateUserService:", dbError);
-      const error = new Error('Gagal memperbarui user di database.');
-      error.statusCode = 500;
-      throw error;
-    }
+    console.error("Prisma Error in updateUserService:", dbError);
+    const error = new Error('Gagal memperbarui user di database.');
+    error.statusCode = 500;
+    throw error;
+  }
 };
-export const deleteUserService = async (userId) => { /* ... kode Anda ... */ 
-    const id = parseInt(userId, 10);
-    if (isNaN(id)) {
-      const error = new Error('ID User tidak valid.');
-      error.statusCode = 400;
+export const deleteUserService = async (userId) => { /* ... kode Anda ... */
+  // const id = parseInt(userId, 10);
+  if (!userId) {
+    const error = new Error('ID User tidak valid.');
+    error.statusCode = 400;
+    throw error;
+  }
+  try {
+    await prisma.user.delete({ where: { id: userId } });
+  } catch (dbError) {
+    if (dbError.code === 'P2025') {
+      const error = new Error('User tidak ditemukan untuk dihapus.');
+      error.statusCode = 404;
       throw error;
     }
-    try {
-      await prisma.user.delete({ where: { id } });
-    } catch (dbError) {
-      if (dbError.code === 'P2025') {
-        const error = new Error('User tidak ditemukan untuk dihapus.');
-        error.statusCode = 404;
-        throw error;
-      }
-      console.error("Prisma Error in deleteUserService:", dbError);
-      const error = new Error('Gagal menghapus user dari database.');
-      error.statusCode = 500;
-      throw error;
-    }
+    console.error("Prisma Error in deleteUserService:", dbError);
+    const error = new Error('Gagal menghapus user dari database.');
+    error.statusCode = 500;
+    throw error;
+  }
 };
 
 
