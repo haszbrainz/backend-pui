@@ -1,5 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
@@ -42,41 +48,57 @@ async function main() {
 
     console.log({ admin, user });
 
+    // Get local images
+    const uploadsDir = path.join(__dirname, '../public/uploads');
+    let imageFiles = [];
+    try {
+        imageFiles = fs.readdirSync(uploadsDir).filter(file => /^Asset\s\d+\.(jpg|jpeg|png|gif|webp)$/i.test(file));
+    } catch (e) {
+        console.warn('Warning: Could not read uploads directory. Using placeholders.');
+    }
+
+    const getRandomImage = () => {
+        if (imageFiles.length === 0) return 'https://placehold.co/600x400';
+        const randomFile = imageFiles[Math.floor(Math.random() * imageFiles.length)];
+        // Encode filenames to handle spaces/special chars in URL
+        return `/uploads/${encodeURIComponent(randomFile)}`;
+    };
+
     // 3. Seed Fish References
     const fishData = [
         {
             name: 'Ikan Sapu-sapu',
             scientificName: 'Pterygoplichthys pardalis',
             description: 'Ikan pembersih kaca yang invasif, merusak ekosistem sungai dengan mengeruk dasar sungai.',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Pterygoplichthys_pardalis_-_Loricariidae_-_Saugwels.jpg/640px-Pterygoplichthys_pardalis_-_Loricariidae_-_Saugwels.jpg',
+            imageUrl: getRandomImage(),
             dangerLevel: 'MEDIUM',
         },
         {
             name: 'Ikan Aligator',
             scientificName: 'Atractosteus spatula',
             description: 'Predator puncak dengan gigi tajam, memangsa ikan lokal dan berbahaya bagi manusia.',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Alligator_Gar_1.jpg/640px-Alligator_Gar_1.jpg',
+            imageUrl: getRandomImage(),
             dangerLevel: 'HIGH',
         },
         {
             name: 'Arapaima Gigas',
             scientificName: 'Arapaima gigas',
             description: 'Ikan air tawar terbesar di dunia, predator rakus yang menghabiskan sumber daya ikan lokal.',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Arapaima_gigas_2.jpg/640px-Arapaima_gigas_2.jpg',
+            imageUrl: getRandomImage(),
             dangerLevel: 'HIGH',
         },
         {
             name: 'Ikan Piranha',
             scientificName: 'Pygocentrus nattereri',
             description: 'Ikan karnivora agresif yang hidup berkelompok, sangat berbahaya bagi biota air lain.',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Piranha_-_01.jpg/640px-Piranha_-_01.jpg',
+            imageUrl: getRandomImage(),
             dangerLevel: 'HIGH',
         },
         {
             name: 'Red Devil',
             scientificName: 'Amphilophus labiatus',
             description: 'Sangat agresif dan teritorial, sering membunuh ikan lain di sekitarnya.',
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Amphilophus_labiatus_2014_G1.jpg/640px-Amphilophus_labiatus_2014_G1.jpg',
+            imageUrl: getRandomImage(),
             dangerLevel: 'MEDIUM',
         },
     ];
@@ -92,31 +114,31 @@ async function main() {
         {
             title: 'Bahaya Ikan Invasif bagi Ekosistem Lokal',
             content: 'Ikan invasif adalah spesies pendatang yang dapat menyebabkan kerusakan lingkungan, ekonomi, atau kesehatan manusia. Mereka seringkali tidak memiliki predator alami di lingkungan baru, sehingga populasinya meledak tak terkendali.',
-            thumbnailUrl: 'https://cdn.pixabay.com/photo/2019/12/13/19/33/nature-4693574_1280.jpg',
+            thumbnailUrl: getRandomImage(),
             sourceUrl: 'https://kkp.go.id',
         },
         {
             title: 'Mengapa Ikan Aligator Dilarang di Indonesia?',
             content: 'Ikan Aligator dilarang dipelihara di Indonesia berdasarkan Peraturan Menteri Kelautan dan Perikanan. Sifatnya yang predator ganas dapat memusnahkan ikan-ikan endemik Indonesia jika terlepas ke perairan umum.',
-            thumbnailUrl: 'https://cdn.pixabay.com/photo/2020/06/25/16/09/fish-5340277_1280.jpg',
+            thumbnailUrl: getRandomImage(),
             sourceUrl: 'https://news.detik.com',
         },
         {
             title: 'Mengenal Arapaima Gigas, Raksasa Sungai Amazon',
             content: 'Arapaima Gigas bisa tumbuh hingga 3 meter. Jika masuk ke sungai di Indonesia, ia akan menjadi super-predator yang menghabiskan ikan-ikan kecil, mengganggu rantai makanan.',
-            thumbnailUrl: 'https://cdn.pixabay.com/photo/2021/09/08/13/19/fish-6606827_1280.jpg',
+            thumbnailUrl: getRandomImage(),
             sourceUrl: 'https://nationalgeographic.grid.id',
         },
         {
             title: 'Dampak Pelepasan Ikan Hias ke Sungai',
             content: 'Banyak pemilik ikan hias melepas peliharaannya ke sungai saat sudah bosan atau ikan terlalu besar. Ini adalah praktik berbahaya yang menjadi salah satu penyebab utama penyebaran spesies invasif.',
-            thumbnailUrl: 'https://cdn.pixabay.com/photo/2016/11/29/09/49/fish-1868779_1280.jpg',
+            thumbnailUrl: getRandomImage(),
             sourceUrl: 'https://wwf.id',
         },
         {
             title: 'Cara Melaporkan Penemuan Ikan Invasif',
             content: 'Jika Anda menemukan ikan yang mencurigakan atau diketahui sebagai spesies invasif, segera laporkan melalui aplikasi ini. Foto dan lokasi yang akurat sangat membantu petugas dalam penanganan.',
-            thumbnailUrl: 'https://cdn.pixabay.com/photo/2018/04/13/11/53/fishing-3316041_1280.jpg',
+            thumbnailUrl: getRandomImage(),
             sourceUrl: 'https://bhasbi.app',
         },
     ];
