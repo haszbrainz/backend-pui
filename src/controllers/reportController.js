@@ -25,7 +25,16 @@ export const createReport = async (req, res) => {
             addressText
         });
 
-        res.status(201).json({ success: true, data: report });
+        const baseUrl = getBaseUrl(req);
+        const transformedReport = {
+            ...report,
+            photoUrl: transformUrl(report.photoUrl, baseUrl),
+            // fishReference and user might not be populated in create return, 
+            // but if they were, they'd need transformation too. 
+            // Usually create returns the simple object.
+        };
+
+        res.status(201).json({ success: true, data: transformedReport });
     } catch (error) {
         console.error("Create Report Error:", error);
         res.status(500).json({ success: false, error: error.message });
@@ -34,8 +43,23 @@ export const createReport = async (req, res) => {
 
 export const getMyReports = async (req, res) => {
     try {
-        const reports = await ReportService.getReportsByUserId(req.user.userId);
-        res.status(200).json({ success: true, data: reports });
+        const reportList = await ReportService.getReportsByUserId(req.user.userId);
+        const baseUrl = getBaseUrl(req);
+
+        const transformedReports = reportList.map(report => ({
+            ...report,
+            photoUrl: transformUrl(report.photoUrl, baseUrl),
+            user: report.user ? {
+                ...report.user,
+                avatarUrl: transformUrl(report.user.avatarUrl, baseUrl)
+            } : null,
+            fishReference: report.fishReference ? {
+                ...report.fishReference,
+                imageUrl: transformUrl(report.fishReference.imageUrl, baseUrl)
+            } : null
+        }));
+
+        res.status(200).json({ success: true, data: transformedReports });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -70,6 +94,92 @@ export const getApprovedReports = async (req, res) => {
         }));
 
         res.status(200).json({ success: true, data: transformedReports });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const getAllReports = async (req, res) => {
+    try {
+        const filters = {};
+        if (req.query.status) {
+            filters.where = { status: req.query.status.toUpperCase() };
+        }
+
+        const reports = await ReportService.getAllReports(filters);
+        const baseUrl = getBaseUrl(req);
+
+        const transformedReports = reports.map(report => ({
+            ...report,
+            photoUrl: transformUrl(report.photoUrl, baseUrl),
+            user: report.user ? {
+                ...report.user,
+                avatarUrl: transformUrl(report.user.avatarUrl, baseUrl)
+            } : null,
+            fishReference: report.fishReference ? {
+                ...report.fishReference,
+                imageUrl: transformUrl(report.fishReference.imageUrl, baseUrl)
+            } : null
+        }));
+
+        res.status(200).json({ success: true, data: transformedReports });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const getReportById = async (req, res) => {
+    try {
+        const report = await ReportService.getReportById(req.params.id);
+        const baseUrl = getBaseUrl(req);
+
+        const transformedReport = {
+            ...report,
+            photoUrl: transformUrl(report.photoUrl, baseUrl),
+            user: report.user ? {
+                ...report.user,
+                avatarUrl: transformUrl(report.user.avatarUrl, baseUrl)
+            } : null,
+            fishReference: report.fishReference ? {
+                ...report.fishReference,
+                imageUrl: transformUrl(report.fishReference.imageUrl, baseUrl)
+            } : null
+        };
+
+        res.status(200).json({ success: true, data: transformedReport });
+    } catch (error) {
+        res.status(error.message === 'Report not found' ? 404 : 500).json({ success: false, error: error.message });
+    }
+};
+
+export const updateReport = async (req, res) => {
+    try {
+        const updatedReport = await ReportService.updateReport(req.params.id, req.body);
+        const baseUrl = getBaseUrl(req);
+
+        const transformedReport = {
+            ...updatedReport,
+            photoUrl: transformUrl(updatedReport.photoUrl, baseUrl),
+            user: updatedReport.user ? {
+                ...updatedReport.user,
+                avatarUrl: transformUrl(updatedReport.user.avatarUrl, baseUrl)
+            } : null,
+            fishReference: updatedReport.fishReference ? {
+                ...updatedReport.fishReference,
+                imageUrl: transformUrl(updatedReport.fishReference.imageUrl, baseUrl)
+            } : null
+        };
+
+        res.status(200).json({ success: true, message: 'Report updated successfully', data: transformedReport });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const deleteReport = async (req, res) => {
+    try {
+        await ReportService.deleteReport(req.params.id);
+        res.status(200).json({ success: true, message: 'Report deleted successfully' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

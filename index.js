@@ -48,7 +48,7 @@ app.use('/api/fish', fishRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 
-// app.use('/api/laporan', laporanRoutes); // Daftarkan rute laporan jika sudah dipindah
+
 
 app.get('/', (req, res) => {
   res.send('Selamat datang di Backend PUI App!');
