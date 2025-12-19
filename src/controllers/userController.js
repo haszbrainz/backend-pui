@@ -45,6 +45,21 @@ export const deleteUser = async (req, res) => { /* ... kode Anda ... */
 };
 
 
+export const getMyProfile = async (req, res) => {
+  try {
+    // req.user populated by authMiddleware
+    const userId = req.user.userId;
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'User ID tidak ditemukan dalam token.' });
+    }
+    const user = await UserService.getUserByIdService(userId);
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    console.error("Controller Error - getMyProfile:", error.message);
+    res.status(error.statusCode || 500).json({ success: false, error: error.message || 'Terjadi kesalahan saat mengambil profil.' });
+  }
+};
+
 // --- KONTROLER BARU UNTUK LOGIN ---
 // --- KONTROLER LOGIN DIPINDAH KE AUTH CONTROLLER ---
 // export const loginUser = ...

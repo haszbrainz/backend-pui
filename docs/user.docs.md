@@ -26,12 +26,36 @@ Base URL: `http://localhost:3000/api`
 }
 ```
 **Response**:
+
 ```json
 {
   "success": true,
   "data": {
     "user": { ... },
     "token": "eyJhbG..." // Gunakan token ini untuk request yang membutuhkan autentikasi
+  }
+}
+```
+
+---
+
+## User Profile
+
+### Get My Profile
+**Endpoint**: `GET /users/profile`
+**Headers**:
+- `Authorization`: `Bearer <token>`
+**Description**: Mengambil data profil user yang sedang login.
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "...",
+    "email": "user@example.com",
+    "name": "User Name",
+    "role": "USER",
+    "createdAt": "..."
   }
 }
 ```
@@ -90,8 +114,8 @@ Base URL: `http://localhost:3000/api`
 }
 ```
 
-### Get My Reports
-**Endpoint**: `GET /reports/my-reports`
-**Headers**:
-- `Authorization`: `Bearer <token>`
-**Description**: Mengambil daftar laporan yang dibuat oleh user yang sedang login.
+  ### Get My Reports
+  **Endpoint**: `GET /reports/my-reports`
+  **Headers**:
+  - `Authorization`: `Bearer <token>`
+  **Description**: Mengambil daftar laporan yang dibuat oleh user yang sedang login.

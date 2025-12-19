@@ -22,3 +22,20 @@ export const getReportsByUserId = async (userId) => {
         orderBy: { createdAt: 'desc' }
     });
 };
+
+export const getApprovedReports = async () => {
+    return await prisma.report.findMany({
+        where: { status: 'APPROVED' },
+        include: {
+            fishReference: true,
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    avatarUrl: true
+                }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+};

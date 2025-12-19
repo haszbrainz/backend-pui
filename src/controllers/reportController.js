@@ -40,3 +40,37 @@ export const getMyReports = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+
+const getBaseUrl = (req) => {
+    return `${req.protocol}://${req.get('host')}`;
+};
+
+const transformUrl = (url, baseUrl) => {
+    if (!url) return null;
+    return url.startsWith('/') ? `${baseUrl}${url}` : url;
+};
+
+export const getApprovedReports = async (req, res) => {
+    try {
+        const reports = await ReportService.getApprovedReports();
+        const baseUrl = getBaseUrl(req);
+
+        const transformedReports = reports.map(report => ({
+            ...report,
+            photoUrl: transformUrl(report.photoUrl, baseUrl),
+            user: report.user ? {
+                ...report.user,
+                avatarUrl: transformUrl(report.user.avatarUrl, baseUrl)
+            } : null,
+            fishReference: report.fishReference ? {
+                ...report.fishReference,
+                imageUrl: transformUrl(report.fishReference.imageUrl, baseUrl)
+            } : null
+        }));
+
+        res.status(200).json({ success: true, data: transformedReports });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};

@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.post('/', authenticateToken, upload.single('photo'), ReportController.createReport);
 router.get('/my-reports', authenticateToken, ReportController.getMyReports);
+router.get('/public/approved', authenticateToken, ReportController.getApprovedReports);
 
 export default router;

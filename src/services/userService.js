@@ -9,7 +9,6 @@ const selectUserPublicData = {
   id: true,
   email: true,
   name: true,
-  alamatLengkap: true,
   role: true,
   createdAt: true,
   updatedAt: true,
@@ -20,7 +19,7 @@ const selectUserPublicData = {
 // Logika internal fungsi-fungsi ini tetap sama.
 // Contoh:
 export const createUserService = async (userData) => {
-  const { email, password, name, alamatLengkap, role } = userData;
+  const { email, password, name, role } = userData;
   if (!email || !password) {
     const error = new Error('Email dan password wajib diisi.');
     error.statusCode = 400;
@@ -35,7 +34,7 @@ export const createUserService = async (userData) => {
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   try {
     const newUser = await prisma.user.create({
-      data: { email, password: hashedPassword, name, alamatLengkap, role: role || 'USER' },
+      data: { email, password: hashedPassword, name, role: role || 'USER' },
     });
     return newUser;
   } catch (dbError) {
